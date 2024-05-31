@@ -1,74 +1,83 @@
 using Hackathon2024API.Data;
 using Hackathon2024API.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.IO;
-using System.IO.Pipes;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hackathon2024API.Controllers
 {
-    public static class IFormFileExtensions
-    {
-        public static string GetHash(this IFormFile formFile)
-        {
-            using (var stream = formFile.OpenReadStream())
-            {
-                MemoryStream mst = new MemoryStream();
-                stream.CopyTo(mst);
+	public static class IFormFileExtensions
+	{
+		public static string GetHash(this IFormFile formFile)
+		{
+			using (var stream = formFile.OpenReadStream())
+			{
+				MemoryStream mst = new MemoryStream();
+				stream.CopyTo(mst);
 
-                if (mst.ToArray() == null || mst.ToArray().Length == 0) return "";
+				if (mst.ToArray() == null || mst.ToArray().Length == 0) return "";
 
-                using (var md5 = MD5.Create())
-                {
-                    return string.Join("", md5.ComputeHash(mst.ToArray()).Select(x => x.ToString("X2")));
-                }
-            }
-        }
-    }
+				using (var md5 = MD5.Create())
+				{
+					return string.Join("", md5.ComputeHash(mst.ToArray()).Select(x => x.ToString("X2")));
+				}
+			}
+		}
+	}
 
 
 
-    [ApiController]
-    [Route("[controller]")]
-    [Authorize]
-    public class FileController : ControllerBase
-    {
-        ApplicationDbContext _context;
-        public FileController(ApplicationDbContext context) {
-            _context = context;
-        }
-        
-        [HttpGet]
-        public async Task<ActionResult> Index() {
-            return Ok(_context.UserFiles.ToList());
-        }
-        
-        
-        [HttpGet("MyFiles")]
-        public async Task<ActionResult> MyFiles()
-        {
-            return Ok(_context.UserFiles.Where(x=>x.Id==1).ToList());
-        }
-        
-        
-        [HttpPut]
-        public async Task<ActionResult> Upload([FromServices] EncryptionService encryption, List<IFormFile> files)
-        {
-            foreach (var file in files)
-            {
-                var hash = file.GetHash();
 
-                if (_context.UserFiles.Any(file => file.DiskLocation == hash))
-                {
-                    continue;
-                }
+	[ApiController]
+	[Route("[controller]")]
+	public class FileController : ControllerBase
+	{
+		ApplicationDbContext _context;
+		public FileController(ApplicationDbContext context)
+		{
+			_context = context;
+		}
+		/// <summary>
+		/// Возвращает список всех файлов
+		/// </summary>
+		/// <returns></returns>
+		[HttpGet]
+		public async Task<ActionResult> Index()
+		{
+			return Ok(_context.UserFiles.ToList());
+		}
 
-                using (var stream = file.OpenReadStream())
-                {
-                    Directory.CreateDirectory("UserFiles\\1");
-                        stream.Seek(0, SeekOrigin.Begin);
+		/// <summary>
+		/// Возвращает список файлов пользователя
+		/// </summary>
+		/// <returns></returns>
+		[HttpGet("MyFiles")]
+		public async Task<ActionResult> MyFiles()
+		{
+			return Ok(_context.UserFiles.Where(x => x.Id == 1).ToList());
+		}
+
+		/// <summary>
+		/// Загрузка файла
+		/// </summary>
+		/// <returns></returns>
+		[HttpPut]
+		public async Task<ActionResult> Upload([FromServices] EncryptionService encryption, List<IFormFile> files)
+		{
+			foreach (var file in files)
+			{
+				var hash = file.GetHash();
+
+				if (_context.UserFiles.Any(file => file.DiskLocation == hash))
+				{
+					continue;
+				}
+
+				using (var stream = file.OpenReadStream())
+				{
+					Directory.CreateDirectory("UserFiles\\1");
+					stream.Seek(0, SeekOrigin.Begin);
 
                         using (var fileStream = new FileStream($"UserFiles\\1\\{hash}", FileMode.OpenOrCreate))
                         {
@@ -82,8 +91,7 @@ namespace Hackathon2024API.Controllers
             await _context.SaveChangesAsync();
             return Ok(_context.UserFiles.Where(x => x.Id == 1).ToList());
         }
-        
-        
+
         [HttpGet("download")]
         public async Task<ActionResult> Download([FromServices] EncryptionService encryption, string fileName)
         {
@@ -113,7 +121,7 @@ namespace Hackathon2024API.Controllers
             }
         }
         /// <summary>
-        /// �������� �����
+        /// Удаление файла
         /// </summary>
         /// <returns></returns>
         [HttpDelete("delete")]
