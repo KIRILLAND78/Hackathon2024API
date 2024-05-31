@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.IO.Compression;
+using System.Security.Cryptography;
 
 namespace Hackathon2024API.Services
 {
@@ -21,7 +22,11 @@ namespace Hackathon2024API.Services
 
             using (CryptoStream cryptoStream = new CryptoStream(destination, transform, CryptoStreamMode.Write, true))//видит бог, я не хотел оставлять true для хранения стрима открытым
             {
-                source.CopyTo(cryptoStream);
+                using (GZipStream compressionStream = new GZipStream(cryptoStream, CompressionMode.Decompress))
+                {
+                    source.CopyTo(compressionStream);
+                    //compressionStream.CopyTo(cryptoStream);
+                }
                 //try
                 //{
                 //}
@@ -45,9 +50,13 @@ namespace Hackathon2024API.Services
             ICryptoTransform transform = aes.CreateEncryptor(aes.Key, aes.IV);
 
             using (CryptoStream cryptoStream = new CryptoStream(destination, transform, CryptoStreamMode.Write))
+            {
+                using (GZipStream compressionStream = new GZipStream(cryptoStream, CompressionMode.Decompress))
                 {
-                    source.CopyTo(cryptoStream);
+                    source.CopyTo(compressionStream);
+                    //compressionStream.CopyTo(cryptoStream);
                 }
+            }
         }
     }
 }
