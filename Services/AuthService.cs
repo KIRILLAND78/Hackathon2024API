@@ -93,7 +93,7 @@ namespace Hackathon2024API.Services
 
 			var token = new Token
 			{
-				AccessToken = GenerateAccessToken(dto.Email),
+				AccessToken = GenerateAccessToken(dto.Email, _userManager.GetRolesAsync(user).Result.FirstOrDefault("User")),
 				RefreshToken = ""
 			};
 				
@@ -105,13 +105,13 @@ namespace Hackathon2024API.Services
 				Data = token
 			};
 		}
-        private string GenerateAccessToken(string email)
+        private string GenerateAccessToken(string email, string role)
 		{
 			IEnumerable<Claim> claims = new List<Claim>()
 			{
 				new Claim(ClaimTypes.Email, email),
 
-                new Claim(ClaimTypes.Role, "Admin")
+                new Claim(ClaimTypes.Role, role)
             };
         
 			var jwtKey = _configuration.GetSection("Jwt:JwtKey").Value;
