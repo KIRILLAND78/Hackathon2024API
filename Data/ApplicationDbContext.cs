@@ -15,8 +15,8 @@ namespace Hackathon2024API.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
-            //Database.EnsureDeleted();
             Database.EnsureCreated();
+
         }
         public DbSet<UserFile> UserFiles { get; set; }
         
@@ -26,9 +26,11 @@ namespace Hackathon2024API.Data
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<Role>().HasData(new Role { Title = "Admin", Id=1 });
+            builder.Entity<Role>().HasData(new Role { Title = "Admin", Id = 1 });
             builder.Entity<User>().HasData(new User { UserName = "Admin User", Email= "admin@mail.ru", Id=1 });
-           
-        }
+            builder.Entity<IdentityRole<long>>().HasData(
+                new IdentityRole<long> { Id = 1, Name = "User", NormalizedName = "USER" },
+                new IdentityRole<long> { Id = 2, Name = "Admin", NormalizedName = "ADMIN" }
+            );        }
     }
 }
