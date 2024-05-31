@@ -5,6 +5,8 @@ using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
 using log4net;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Hackathon2024API.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace Hackathon2024API.Controllers
 {
@@ -37,9 +39,13 @@ namespace Hackathon2024API.Controllers
         private static ILog log;
 
         ApplicationDbContext _context;
-        public FileController(ApplicationDbContext context, ILog logger) {
+        UserManager<User> _userManager;
+        User user;
+        public FileController(ApplicationDbContext context, ILog logger, UserManager<User> userManager) {
             _context = context;
             log = logger;
+            _userManager = userManager;
+            //user = _userManager.GetUserId(HttpContext.User.Claims.getC)
         }
         /// <summary>
         /// ���������� ������ ���� ������

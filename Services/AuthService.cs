@@ -29,7 +29,7 @@ namespace Hackathon2024API.Services
 			{
 				Email = dto.Email,
 				UserName = dto.Login
-			};
+            };
 
 			var existingUser = await _userManager.FindByEmailAsync(identityUser.Email);
 			
@@ -56,11 +56,15 @@ namespace Hackathon2024API.Services
 					Data = userDto
 				};
 			}
-
+			StringBuilder error = new();
+            foreach (var item in result.Errors)
+            {
+				error.Append(item.Description);
+            }
 			return new BaseResult<UserDto>
 			{
-				ErrorMessage = result.Errors.ToString()
-			};
+				ErrorMessage = error.ToString()
+            };
 		}
 
 		public async Task<BaseResult<Token>> Login(LoginUserDto dto)

@@ -28,7 +28,7 @@ public class AdminController : ControllerBase
     {
         await _adminService.CreateChanges(limitSettings);
 
-        return Ok("успех");
+        return Ok();
         
     }
 }
