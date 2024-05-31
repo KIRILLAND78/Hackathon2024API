@@ -21,7 +21,7 @@ namespace Hackathon2024API.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<Role>().HasData(new Role { Name = "Admin", Id=1 });
-            builder.Entity<User>().HasData(new User { Name = "Admin User", Mail="admin@mail.ru", Id=1 });
+            builder.Entity<User>().HasData(new User { UserName = "Admin User", Mail="admin@mail.ru", Id=1 });
             builder.Entity<User>()
                 .HasMany(p => p.Roles)
                 .WithMany(p => p.Users)
