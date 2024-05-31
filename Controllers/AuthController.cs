@@ -6,8 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Hackathon2024API.Controllers;
 
 [ApiController]
-[ApiVersion("1.0")]
-[Route("api/v{version:apiVersion}/[controller]")]
+[Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
 	private readonly IAuthService _authService;

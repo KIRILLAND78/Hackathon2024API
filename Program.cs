@@ -1,6 +1,8 @@
 using Hackathon2024API;
 using Hackathon2024API.Data;
 using Hackathon2024API.Data.Settings;
+using Hackathon2024API.Interfaces.Services;
+using Hackathon2024API.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.DefaultSection));
 builder.Services.AddAuthenticationAndAuthorization(builder);
-
+builder.Services.AddScoped<IAuthService, AuthSrevice>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

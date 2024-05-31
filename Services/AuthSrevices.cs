@@ -20,13 +20,13 @@ namespace Hackathon2024API.Services
 		public async Task<BaseResult<UserDto>> Register(RegisterUserDto dto)
 		{
 			//TODO валидация пароля. (Pass and PassConfirm)
-			var identityUser = new User
+			var identityUser = new User()
 			{
 				Mail = dto.Email,
-				Name = dto.Login
+				UserName = dto.Login
 			};
 
-			var existingUser = _userManager.FindByEmailAsync(identityUser.Mail);
+			var existingUser = await _userManager.FindByEmailAsync(identityUser.Mail);
 			if (existingUser != null)
 			{
 				return new BaseResult<UserDto>
