@@ -139,7 +139,7 @@ namespace Hackathon2024API.Migrations
                             CanDelete = false,
                             CanRead = false,
                             CanUpload = false,
-                            ConcurrencyStamp = "cf7ae6ec-36aa-4ea0-98b6-5e22a35dae40",
+                            ConcurrencyStamp = "959835d0-8f4b-455f-a824-b8f87e51b347",
                             Email = "admin@mail.ru",
                             EmailConfirmed = false,
                             LockoutEnabled = false,

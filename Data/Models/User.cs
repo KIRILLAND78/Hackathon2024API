@@ -5,7 +5,6 @@ namespace Hackathon2024API.Models
 {
     public class User : IdentityUser<long>
     {
-        
         public short MaxFilesCount { get; set; }
         
         public bool CanUpload { get; set; }

@@ -7,7 +7,6 @@ namespace Hackathon2024API.Data.Models
     {
         public string Title { get; set; }
         
-        
         public ICollection<User> Users { get; set; }
         
         public ICollection<FileExtention> AvailableExtentions { get; set; }

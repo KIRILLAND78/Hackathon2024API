@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Hackathon2024API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240531152007_ArtemChanges")]
-    partial class ArtemChanges
+    [Migration("20240531192459_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -47,13 +47,16 @@ namespace Hackathon2024API.Migrations
                     b.ToTable("FileExtention");
                 });
 
-            modelBuilder.Entity("Hackathon2024API.Models.Role", b =>
+            modelBuilder.Entity("Hackathon2024API.Models.User", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("CanChange")
                         .HasColumnType("boolean");
@@ -66,41 +69,6 @@ namespace Hackathon2024API.Migrations
 
                     b.Property<bool>("CanUpload")
                         .HasColumnType("boolean");
-
-                    b.Property<short>("MaxFilesCount")
-                        .HasColumnType("smallint");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Role");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1L,
-                            CanChange = false,
-                            CanDelete = false,
-                            CanRead = false,
-                            CanUpload = false,
-                            MaxFilesCount = (short)0,
-                            Title = "Admin"
-                        });
-                });
-
-            modelBuilder.Entity("Hackathon2024API.Models.User", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("integer");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -119,6 +87,9 @@ namespace Hackathon2024API.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<short>("MaxFilesCount")
+                        .HasColumnType("smallint");
+
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
@@ -135,6 +106,9 @@ namespace Hackathon2024API.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
+
+                    b.Property<long?>("RoleId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
@@ -155,6 +129,8 @@ namespace Hackathon2024API.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
 
+                    b.HasIndex("RoleId");
+
                     b.ToTable("AspNetUsers", (string)null);
 
                     b.HasData(
@@ -162,10 +138,15 @@ namespace Hackathon2024API.Migrations
                         {
                             Id = 1L,
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "3baf0f6c-d1df-4d47-88bd-d040e3633856",
+                            CanChange = false,
+                            CanDelete = false,
+                            CanRead = false,
+                            CanUpload = false,
+                            ConcurrencyStamp = "959835d0-8f4b-455f-a824-b8f87e51b347",
                             Email = "admin@mail.ru",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
+                            MaxFilesCount = (short)0,
                             PhoneNumberConfirmed = false,
                             TwoFactorEnabled = false,
                             UserName = "Admin User"
@@ -210,6 +191,11 @@ namespace Hackathon2024API.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("text");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("character varying(21)");
+
                     b.Property<string>("Name")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
@@ -225,6 +211,24 @@ namespace Hackathon2024API.Migrations
                         .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityRole<long>");
+
+                    b.UseTphMappingStrategy();
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1L,
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = 2L,
+                            Name = "User",
+                            NormalizedName = "USER"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<long>", b =>
@@ -330,32 +334,28 @@ namespace Hackathon2024API.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("UserRole", b =>
+            modelBuilder.Entity("Hackathon2024API.Data.Models.Role", b =>
                 {
-                    b.Property<long>("RoleId")
-                        .HasColumnType("bigint");
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityRole<long>");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                    b.HasKey("RoleId", "UserId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserRole");
-
-                    b.HasData(
-                        new
-                        {
-                            RoleId = 1L,
-                            UserId = 1L
-                        });
+                    b.HasDiscriminator().HasValue("Role");
                 });
 
             modelBuilder.Entity("Hackathon2024API.Data.Models.FileExtention", b =>
                 {
-                    b.HasOne("Hackathon2024API.Models.Role", null)
+                    b.HasOne("Hackathon2024API.Data.Models.Role", null)
                         .WithMany("AvailableExtentions")
+                        .HasForeignKey("RoleId");
+                });
+
+            modelBuilder.Entity("Hackathon2024API.Models.User", b =>
+                {
+                    b.HasOne("Hackathon2024API.Data.Models.Role", null)
+                        .WithMany("Users")
                         .HasForeignKey("RoleId");
                 });
 
@@ -421,29 +421,16 @@ namespace Hackathon2024API.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("UserRole", b =>
-                {
-                    b.HasOne("Hackathon2024API.Models.Role", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Hackathon2024API.Models.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Hackathon2024API.Models.Role", b =>
-                {
-                    b.Navigation("AvailableExtentions");
-                });
-
             modelBuilder.Entity("Hackathon2024API.Models.User", b =>
                 {
                     b.Navigation("Files");
+                });
+
+            modelBuilder.Entity("Hackathon2024API.Data.Models.Role", b =>
+                {
+                    b.Navigation("AvailableExtentions");
+
+                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }
