@@ -3,6 +3,7 @@ using Hackathon2024API.Data;
 using Hackathon2024API.Data.Settings;
 using Hackathon2024API.Interfaces.Services;
 using Hackathon2024API.Services;
+using log4net.Config;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +35,8 @@ if (app.Environment.IsDevelopment())
         c.RoutePrefix = "swagger";
     });
 }
+
+XmlConfigurator.Configure(new FileInfo("log4net.config"));
 
 app.UseHttpsRedirection();
 
