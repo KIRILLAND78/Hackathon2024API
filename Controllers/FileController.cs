@@ -5,6 +5,7 @@ using System.IO;
 using System.IO.Pipes;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace Hackathon2024API.Controllers
 {
@@ -38,27 +39,20 @@ namespace Hackathon2024API.Controllers
         public FileController(ApplicationDbContext context) {
             _context = context;
         }
-        /// <summary>
-        /// ���������� ������ ���� ������
-        /// </summary>
-        /// <returns></returns>
+        
         [HttpGet]
         public async Task<ActionResult> Index() {
             return Ok(_context.UserFiles.ToList());
         }
-        /// <summary>
-        /// ���������� ������ ������ ������������
-        /// </summary>
-        /// <returns></returns>
+        
+        
         [HttpGet("MyFiles")]
         public async Task<ActionResult> MyFiles()
         {
             return Ok(_context.UserFiles.Where(x=>x.Id==1).ToList());
         }
-        /// <summary>
-        /// �������� �����
-        /// </summary>
-        /// <returns></returns>
+        
+        
         [HttpPut]
         public async Task<ActionResult> Upload([FromServices] EncryptionService encryption, List<IFormFile> files)
         {
@@ -83,19 +77,17 @@ namespace Hackathon2024API.Controllers
 
                 }
                 
-                _context.UserFiles.Add(new Models.UserFile { DiskLocation = $"{hash}", Name = file.FileName, Owner = _context.Users.First() });
+                await _context.UserFiles.AddAsync(new Models.UserFile { DiskLocation = $"{hash}", Name = file.FileName, Owner = _context.Users.First() });
             }
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return Ok(_context.UserFiles.Where(x => x.Id == 1).ToList());
         }
-        /// <summary>
-        /// ���������� �����
-        /// </summary>
-        /// <returns></returns>
+        
+        
         [HttpGet("download")]
         public async Task<ActionResult> Download([FromServices] EncryptionService encryption, string fileName)
         {
-            var file = _context.UserFiles.Where(x=>x.Name==fileName).FirstOrDefault();
+            var file = _context.UserFiles.FirstOrDefault(x => x.Name==fileName);
             if (file == null) return NotFound();
             try
             {
@@ -112,7 +104,7 @@ namespace Hackathon2024API.Controllers
             } catch (FileNotFoundException ex)
             {
                 _context.Remove(file);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
                 throw new Exception("file corrupted");
             }
             catch (Exception ex)
@@ -127,11 +119,13 @@ namespace Hackathon2024API.Controllers
         [HttpDelete("delete")]
         public async Task<ActionResult> Delete(string fileName)
         {
-            var file = _context.UserFiles.Where(x => x.Name == fileName).FirstOrDefault();
+            var file = _context.UserFiles.FirstOrDefault(x => x.Name == fileName);
+            
             if (file == null) return NotFound();
+            
             System.IO.File.Delete($"UserFiles\\1\\{file.DiskLocation}");
             _context.Remove(file);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return Ok();
         }
     }
