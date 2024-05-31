@@ -1,6 +1,8 @@
-﻿namespace Hackathon2024API.Models
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace Hackathon2024API.Models
 {
-    public class User
+    public class User : IdentityUser<long>
     {
         public long Id { get; set; }
         public string Name { get; set; }
