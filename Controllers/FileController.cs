@@ -1,72 +1,82 @@
 using Hackathon2024API.Data;
 using Hackathon2024API.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.IO;
-using System.IO.Pipes;
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Hackathon2024API.Controllers
 {
-    public static class IFormFileExtensions
-    {
-        public static string GetHash(this IFormFile formFile)
-        {
-            using (var stream = formFile.OpenReadStream())
-            {
-                MemoryStream mst = new MemoryStream();
-                stream.CopyTo(mst);
+	public static class IFormFileExtensions
+	{
+		public static string GetHash(this IFormFile formFile)
+		{
+			using (var stream = formFile.OpenReadStream())
+			{
+				MemoryStream mst = new MemoryStream();
+				stream.CopyTo(mst);
 
-                if (mst.ToArray() == null || mst.ToArray().Length == 0) return "";
+				if (mst.ToArray() == null || mst.ToArray().Length == 0) return "";
 
-                using (var md5 = MD5.Create())
-                {
-                    return string.Join("", md5.ComputeHash(mst.ToArray()).Select(x => x.ToString("X2")));
-                }
-            }
-        }
-    }
+				using (var md5 = MD5.Create())
+				{
+					return string.Join("", md5.ComputeHash(mst.ToArray()).Select(x => x.ToString("X2")));
+				}
+			}
+		}
+	}
 
 
 
-    [ApiController]
-    [Route("[controller]")]
-    public class FileController : ControllerBase
-    {
-        ApplicationDbContext _context;
-        public FileController(ApplicationDbContext context) {
-            _context = context;
-        }
-        /// <summary>
-        /// Возвращает список всех файлов
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        public async Task<ActionResult> Index() {
-            return Ok(_context.UserFiles.ToList());
-        }
-        /// <summary>
-        /// Возвращает список файлов пользователя
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("MyFiles")]
-        public async Task<ActionResult> MyFiles()
-        {
-            return Ok(_context.UserFiles.Where(x=>x.Id==1).ToList());
-        }
-        /// <summary>
-        /// Загрузка файла
-        /// </summary>
-        /// <returns></returns>
-        [HttpPut]
-        public async Task<ActionResult> Upload([FromServices] EncryptionService encryption, List<IFormFile> files)
-        {
-            foreach (var file in files)
-            {
-                var hash = file.GetHash();
-                using (var stream = file.OpenReadStream())
-                {
-                    Directory.CreateDirectory("UserFiles\\1");
-                        stream.Seek(0, SeekOrigin.Begin);
+	[ApiController]
+	[Route("[controller]")]
+	public class FileController : ControllerBase
+	{
+		ApplicationDbContext _context;
+		public FileController(ApplicationDbContext context)
+		{
+			_context = context;
+		}
+
+		/// <summary>
+		/// Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє РІСЃРµС… С„Р°Р№Р»РѕРІ
+		/// </summary>
+		/// <returns></returns>
+		[HttpGet]
+		public async Task<ActionResult> Index()
+		{
+			return Ok(_context.UserFiles.ToList());
+		}
+
+		/// <summary>
+		/// Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє С„Р°Р№Р»РѕРІ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
+		/// </summary>
+		/// <returns></returns>
+		[HttpGet("MyFiles")]
+		public async Task<ActionResult> MyFiles()
+		{
+			return Ok(_context.UserFiles.Where(x => x.Id == 1).ToList());
+		}
+
+		/// <summary>
+		/// Р—Р°РіСЂСѓР·РєР° С„Р°Р№Р»Р°
+		/// </summary>
+		/// <returns></returns>
+		[HttpPut]
+		public async Task<ActionResult> Upload([FromServices] EncryptionService encryption, List<IFormFile> files)
+		{
+			foreach (var file in files)
+			{
+				var hash = file.GetHash();
+
+				if (_context.UserFiles.Any(file => file.DiskLocation == hash))
+				{
+					continue;
+				}
+
+				using (var stream = file.OpenReadStream())
+				{
+					Directory.CreateDirectory("UserFiles\\1");
+					stream.Seek(0, SeekOrigin.Begin);
 
                         using (var fileStream = new FileStream($"UserFiles\\1\\{hash}", FileMode.OpenOrCreate))
                         {
@@ -75,13 +85,13 @@ namespace Hackathon2024API.Controllers
 
                 }
                 
-                    _context.UserFiles.Add(new Models.UserFile { DiskLocation = $"{hash}", Name = file.FileName, Owner = _context.Users.First() });
+                _context.UserFiles.Add(new Models.UserFile { DiskLocation = $"{hash}", Name = file.FileName, Owner = _context.Users.First() });
             }
             _context.SaveChanges();
             return Ok(_context.UserFiles.Where(x => x.Id == 1).ToList());
         }
         /// <summary>
-        /// Скачивание файла
+        /// РЎРєР°С‡РёРІР°РЅРёРµ С„Р°Р№Р»Р°
         /// </summary>
         /// <returns></returns>
         [HttpGet("download")]
@@ -113,7 +123,7 @@ namespace Hackathon2024API.Controllers
             }
         }
         /// <summary>
-        /// Удаление файла
+        /// РЈРґР°Р»РµРЅРёРµ С„Р°Р№Р»Р°
         /// </summary>
         /// <returns></returns>
         [HttpDelete("delete")]

@@ -12,16 +12,18 @@ namespace Hackathon2024API.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
-            Database.EnsureDeleted();
             Database.EnsureCreated();
         }
         public DbSet<UserFile> UserFiles { get; set; }
+        
         public DbSet<User> Users { get; set; }
-        public DbSet<Role> Roles { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.Entity<Role>().HasData(new Role { Name = "Admin", Id=1 });
-            builder.Entity<User>().HasData(new User { UserName = "Admin User", Mail="admin@mail.ru", Id=1 });
+            base.OnModelCreating(builder);
+
+            builder.Entity<Role>().HasData(new Role { Title = "Admin", Id=1 });
+            builder.Entity<User>().HasData(new User { UserName = "Admin User", Email= "admin@mail.ru", Id=1 });
             builder.Entity<User>()
                 .HasMany(p => p.Roles)
                 .WithMany(p => p.Users)
