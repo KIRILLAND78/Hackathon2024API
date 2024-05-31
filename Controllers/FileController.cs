@@ -1,6 +1,8 @@
 using Hackathon2024API.Data;
+using Hackathon2024API.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
+using System.IO.Pipes;
 using System.Security.Cryptography;
 
 namespace Hackathon2024API.Controllers
@@ -56,7 +58,7 @@ namespace Hackathon2024API.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPut]
-        public async Task<ActionResult> Upload(List<IFormFile> files)
+        public async Task<ActionResult> Upload([FromServices] EncryptionService encryption, List<IFormFile> files)
         {
             foreach (var file in files)
             {
@@ -64,14 +66,15 @@ namespace Hackathon2024API.Controllers
                 using (var stream = file.OpenReadStream())
                 {
                     Directory.CreateDirectory("UserFiles\\1");
-                    using (var fileStream = new FileStream($"UserFiles\\1\\{hash}", FileMode.OpenOrCreate))
-                    {
                         stream.Seek(0, SeekOrigin.Begin);
-                        stream.CopyTo(fileStream);
-                        fileStream.Close();
-                    }
-                }
 
+                        using (var fileStream = new FileStream($"UserFiles\\1\\{hash}", FileMode.OpenOrCreate))
+                        {
+                            encryption.EncryptFile(stream, fileStream, file.FileName);
+                        }
+
+                }
+                
                     _context.UserFiles.Add(new Models.UserFile { DiskLocation = $"{hash}", Name = file.FileName, Owner = _context.Users.First() });
             }
             _context.SaveChanges();
@@ -82,18 +85,31 @@ namespace Hackathon2024API.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("download")]
-        public async Task<ActionResult> Download(string fileName)
+        public async Task<ActionResult> Download([FromServices] EncryptionService encryption, string fileName)
         {
             var file = _context.UserFiles.Where(x=>x.Name==fileName).FirstOrDefault();
             if (file == null) return NotFound();
             try
             {
-                return Ok(new FileStream($"UserFiles\\1\\{file.DiskLocation}", FileMode.Open));
+                MemoryStream decryptedStream = new MemoryStream();
+                {
+                    using (FileStream fileStream = new FileStream($"UserFiles\\1\\{file.DiskLocation}", FileMode.Open))
+                    {
+                        encryption.DecryptFile(fileStream, decryptedStream, file.Name);
+                        decryptedStream.Seek(0, SeekOrigin.Begin);
+                        return File(decryptedStream, System.Net.Mime.MediaTypeNames.Application.Octet, file.Name);
+                        
+                    }
+                }
             } catch (FileNotFoundException ex)
             {
                 _context.Remove(file);
                 _context.SaveChanges();
                 throw new Exception("file corrupted");
+            }
+            catch (Exception ex)
+            {
+                return Ok(123);
             }
         }
         /// <summary>
