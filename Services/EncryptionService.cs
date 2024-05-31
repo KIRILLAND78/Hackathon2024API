@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.IO.Compression;
+using System.Security.Cryptography;
 
 namespace Hackathon2024API.Services
 {
@@ -19,18 +20,14 @@ namespace Hackathon2024API.Services
             aes.Mode = CipherMode.CBC;
             ICryptoTransform transform = aes.CreateDecryptor(aes.Key, aes.IV);
 
-            using (CryptoStream cryptoStream = new CryptoStream(destination, transform, CryptoStreamMode.Write, true))//видит бог, я не хотел оставлять true для хранения стрима открытым
+            var v = new MemoryStream();
+
+            using (CryptoStream cryptoStream = new CryptoStream(source, transform, CryptoStreamMode.Read))
             {
-                source.CopyTo(cryptoStream);
-                //try
-                //{
-                //}
-                //catch (CryptographicException exception)
-                //{
-                //    if (exception.Message == "Padding is invalid and cannot be removed.")
-                //        throw new ApplicationException("Cryptographic Exception (!)", exception);
-                //    else throw;
-                //}
+                using (GZipStream decompressionStream = new GZipStream(cryptoStream, CompressionMode.Decompress))
+                {
+                    decompressionStream.CopyTo(destination);
+                }
             }
         }
         public void EncryptFile(Stream source, Stream destination, string password)
@@ -45,9 +42,13 @@ namespace Hackathon2024API.Services
             ICryptoTransform transform = aes.CreateEncryptor(aes.Key, aes.IV);
 
             using (CryptoStream cryptoStream = new CryptoStream(destination, transform, CryptoStreamMode.Write))
+            {
+                using (GZipStream compressionStream = new GZipStream(cryptoStream, CompressionLevel.SmallestSize))
                 {
-                    source.CopyTo(cryptoStream);
+                    source.CopyTo(compressionStream);
+                    //compressionStream.CopyTo(cryptoStream);
                 }
+            }
         }
     }
 }
