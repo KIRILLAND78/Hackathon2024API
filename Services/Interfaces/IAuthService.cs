@@ -1,4 +1,5 @@
-﻿using Hackathon2024API.DTO.User;
+﻿using Hackathon2024API.Data.Settings;
+using Hackathon2024API.DTO.User;
 using Hackathon2024API.Result;
 namespace Hackathon2024API.Interfaces.Services
 {
@@ -6,8 +7,10 @@ namespace Hackathon2024API.Interfaces.Services
 	{
 		Task<BaseResult<UserDto>> Register(RegisterUserDto dto);
 
-		//Task<BaseResult<TokenDto>> Login(LoginUserDto dto);
+		Task<BaseResult<Token>> Login(LoginUserDto dto);
 
+		
+		
 		/// <summary>
 		/// Метод, предназначенный для проверки наличия пользователя в системе
 		/// </summary>

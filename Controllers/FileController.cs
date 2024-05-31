@@ -2,6 +2,7 @@ using Hackathon2024API.Data;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Hackathon2024API.Controllers
 {
@@ -28,6 +29,7 @@ namespace Hackathon2024API.Controllers
 
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
     public class FileController : ControllerBase
     {
         ApplicationDbContext _context;
@@ -35,7 +37,7 @@ namespace Hackathon2024API.Controllers
             _context = context;
         }
         /// <summary>
-        /// Возвращает список всех файлов
+        /// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
         /// </summary>
         /// <returns></returns>
         [HttpGet]
@@ -43,7 +45,7 @@ namespace Hackathon2024API.Controllers
             return Ok(_context.UserFiles.ToList());
         }
         /// <summary>
-        /// Возвращает список файлов пользователя
+        /// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         /// </summary>
         /// <returns></returns>
         [HttpGet("MyFiles")]
@@ -52,7 +54,7 @@ namespace Hackathon2024API.Controllers
             return Ok(_context.UserFiles.Where(x=>x.Id==1).ToList());
         }
         /// <summary>
-        /// Загрузка файла
+        /// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
         /// </summary>
         /// <returns></returns>
         [HttpPut]
@@ -78,7 +80,7 @@ namespace Hackathon2024API.Controllers
             return Ok(_context.UserFiles.Where(x => x.Id == 1).ToList());
         }
         /// <summary>
-        /// Скачивание файла
+        /// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
         /// </summary>
         /// <returns></returns>
         [HttpGet("download")]
@@ -97,7 +99,7 @@ namespace Hackathon2024API.Controllers
             }
         }
         /// <summary>
-        /// Удаление файла
+        /// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
         /// </summary>
         /// <returns></returns>
         [HttpDelete("delete")]
