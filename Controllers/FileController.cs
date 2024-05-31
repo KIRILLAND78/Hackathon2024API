@@ -117,10 +117,6 @@ namespace Hackathon2024API.Controllers
                 _context.SaveChanges();
                 throw new Exception("file corrupted");
             }
-            catch (Exception ex)
-            {
-                return Ok(123);
-            }
         }
         /// <summary>
         /// Удаление файла
