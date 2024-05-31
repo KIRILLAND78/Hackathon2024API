@@ -63,6 +63,12 @@ namespace Hackathon2024API.Controllers
             foreach (var file in files)
             {
                 var hash = file.GetHash();
+
+                if (_context.UserFiles.Any(file => file.DiskLocation == hash))
+                {
+                    continue;
+                }
+
                 using (var stream = file.OpenReadStream())
                 {
                     Directory.CreateDirectory("UserFiles\\1");
@@ -75,7 +81,7 @@ namespace Hackathon2024API.Controllers
 
                 }
                 
-                    _context.UserFiles.Add(new Models.UserFile { DiskLocation = $"{hash}", Name = file.FileName, Owner = _context.Users.First() });
+                _context.UserFiles.Add(new Models.UserFile { DiskLocation = $"{hash}", Name = file.FileName, Owner = _context.Users.First() });
             }
             _context.SaveChanges();
             return Ok(_context.UserFiles.Where(x => x.Id == 1).ToList());
