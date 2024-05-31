@@ -43,6 +43,7 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/df33c7fd7db04a829574707592655c01d82000/26/2a2764ee/ExceptionDispatchInfo.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/e069a7445f134165b6a00dd51190c5231a908/43/91dad516/IdentityEntityFrameworkBuilderExtensions.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/f1bb10e1f35f4b88a719d9dcc0f401ba219600/2a/5afb1d53/ApiBehaviorApplicationModelProvider.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/fcbf4f8a5ab54375abcfa46e8f5896b536c00/e8/f34fa4dc/ServiceProvider.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Program.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/appsettings.json" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../MagazinesREALLY/Tech.Api/Controllers/UserManagmentController.cs" root0="SKIP_HIGHLIGHTING" />
@@ -117,7 +118,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1717155410637</updated>
-      <workItem from="1717155412661" duration="10488000" />
+      <workItem from="1717155412661" duration="15586000" />
     </task>
     <servers />
   </component>
@@ -143,32 +144,6 @@
             </endOffsets>
           </properties>
           <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/Controllers/AuthController.cs</url>
-          <line>35</line>
-          <properties documentPath="$PROJECT_DIR$/Controllers/AuthController.cs" containingFunctionPresentation="Method 'Login'">
-            <startOffsets>
-              <option value="759" />
-            </startOffsets>
-            <endOffsets>
-              <option value="813" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/Services/AuthService.cs</url>
-          <line>67</line>
-          <properties documentPath="$PROJECT_DIR$/Services/AuthService.cs" containingFunctionPresentation="Method 'Login'">
-            <startOffsets>
-              <option value="1661" />
-            </startOffsets>
-            <endOffsets>
-              <option value="1719" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

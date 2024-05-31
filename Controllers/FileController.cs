@@ -46,7 +46,8 @@ namespace Hackathon2024API.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public async Task<ActionResult> Index() {
+        public async Task<ActionResult> Index() 
+		{
             return Ok(_context.UserFiles.ToList());
         }
         /// <summary>
