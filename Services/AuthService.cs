@@ -1,4 +1,5 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Hackathon2024API.Data.Settings;
@@ -6,6 +7,7 @@ using Hackathon2024API.DTO.User;
 using Hackathon2024API.Interfaces.Services;
 using Hackathon2024API.Models;
 using Hackathon2024API.Result;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
@@ -85,7 +87,7 @@ namespace Hackathon2024API.Services
 			{
 				return new BaseResult<Token>()
 				{
-					ErrorMessage = "Проверка на пароль не пройдена"
+					ErrorMessage = "Пароль неверен"
 				};
 			}
 
@@ -103,14 +105,14 @@ namespace Hackathon2024API.Services
 				Data = token
 			};
 		}
-		
-		private string GenerateAccessToken(string email)
+        private string GenerateAccessToken(string email)
 		{
 			IEnumerable<Claim> claims = new List<Claim>()
 			{
 				new Claim(ClaimTypes.Email, email),
-				new Claim(ClaimTypes.Role, "Admin"),
-			};
+
+                new Claim(ClaimTypes.Role, "Admin")
+            };
         
 			var jwtKey = _configuration.GetSection("Jwt:JwtKey").Value;
 

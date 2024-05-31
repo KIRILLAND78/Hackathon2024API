@@ -26,10 +26,17 @@ namespace Hackathon2024API.Data
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<User>().HasData(new User { UserName = "Admin User", Email= "admin@mail.ru", Id=1 });
+            var hasher = new PasswordHasher<User>();
+            builder.Entity<User>().HasData(new User { UserName = "Admin User", NormalizedUserName= "ADMIN USER", Email= "admin@mail.ru", NormalizedEmail= "ADMIN@MAIL.RU", Id=1, PasswordHash = hasher.HashPassword(null, "password"), });
             builder.Entity<IdentityRole<long>>().HasData(
                 new IdentityRole<long> { Id = 1, Name = "Admin", NormalizedName = "ADMIN" },
                 new IdentityRole<long> { Id = 2, Name = "User", NormalizedName = "USER" }
-            );        }
+            );
+            builder.Entity<IdentityUserRole<long>>().HasData(new IdentityUserRole<long>
+            {
+                RoleId = 1,
+                UserId = 1
+            });
+        }
     }
 }

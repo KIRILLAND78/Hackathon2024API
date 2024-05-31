@@ -33,7 +33,7 @@ namespace Hackathon2024API.Controllers
 
     [ApiController]
     [Route("[controller]")]
-    //[Authorize]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     public class FileController : ControllerBase
     {
         private static ILog log;

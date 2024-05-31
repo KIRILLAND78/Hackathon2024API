@@ -3,6 +3,7 @@ using System;
 using Hackathon2024API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Hackathon2024API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240531194742_Init2")]
+    partial class Init2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -112,14 +115,12 @@ namespace Hackathon2024API.Migrations
                             CanDelete = false,
                             CanRead = false,
                             CanUpload = false,
-                            ConcurrencyStamp = "5586802b-4d14-45b8-9950-a48ca9fa777a",
+                            ConcurrencyStamp = "08f151b4-fdc2-4874-a3d7-a3fa9e67dabb",
                             Email = "admin@mail.ru",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
                             MaxFilesCount = (short)0,
-                            NormalizedEmail = "ADMIN@MAIL.RU",
-                            NormalizedUserName = "ADMIN USER",
-                            PasswordHash = "AQAAAAIAAYagAAAAEC6nHLZi5oj5bZoC4bzwW91zmCZSCpr5K91F65xwgabMpnZN2VDTB1wlD1dikizFlg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEKERy19dHQIbf8bkHCepwl+fmU/XNWdcomoPbSCMDzY8Xh25TA8EfCIKN+PwJDWMdw==",
                             PhoneNumberConfirmed = false,
                             TwoFactorEnabled = false,
                             UserName = "Admin User"
