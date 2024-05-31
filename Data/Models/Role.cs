@@ -11,6 +11,7 @@ namespace Hackathon2024API.Models
         public bool CanRead { get; set; }
         public bool CanChange { get; set; }
         public bool CanDelete { get; set; }
+        public ICollection<User> Users { get; set; }
         public ICollection<FileExtention> AvailableExtentions { get; set; }
     }
 }

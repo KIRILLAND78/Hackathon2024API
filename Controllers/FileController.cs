@@ -2,6 +2,7 @@ using Hackathon2024API.Data;
 using Hackathon2024API.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Hackathon2024API.Controllers
 {
@@ -37,7 +38,7 @@ namespace Hackathon2024API.Controllers
 		}
 
 		/// <summary>
-		/// Возвращает список всех файлов
+		/// Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє РІСЃРµС… С„Р°Р№Р»РѕРІ
 		/// </summary>
 		/// <returns></returns>
 		[HttpGet]
@@ -47,7 +48,7 @@ namespace Hackathon2024API.Controllers
 		}
 
 		/// <summary>
-		/// Возвращает список файлов пользователя
+		/// Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє С„Р°Р№Р»РѕРІ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 		/// </summary>
 		/// <returns></returns>
 		[HttpGet("MyFiles")]
@@ -57,7 +58,7 @@ namespace Hackathon2024API.Controllers
 		}
 
 		/// <summary>
-		/// Загрузка файла
+		/// Р—Р°РіСЂСѓР·РєР° С„Р°Р№Р»Р°
 		/// </summary>
 		/// <returns></returns>
 		[HttpPut]
@@ -77,74 +78,63 @@ namespace Hackathon2024API.Controllers
 					Directory.CreateDirectory("UserFiles\\1");
 					stream.Seek(0, SeekOrigin.Begin);
 
-					using (var fileStream = new FileStream($"UserFiles\\1\\{hash}", FileMode.OpenOrCreate))
-					{
-						encryption.EncryptFile(stream, fileStream, file.FileName);
-					}
-				}
+                        using (var fileStream = new FileStream($"UserFiles\\1\\{hash}", FileMode.OpenOrCreate))
+                        {
+                            encryption.EncryptFile(stream, fileStream, file.FileName);
+                        }
 
-				_context.UserFiles.Add(new Models.UserFile { DiskLocation = $"{hash}", Name = file.FileName, Owner = _context.Users.First() });
-			}
-
-			_context.SaveChanges();
-			return Ok(_context.UserFiles.Where(x => x.Id == 1).ToList());
-		}
-
-		/// <summary>
-		/// Скачивание файла
-		/// </summary>
-		/// <returns></returns>
-		[HttpGet("download")]
-		public async Task<ActionResult> Download([FromServices] EncryptionService encryption, string fileName)
-		{
-			var file = _context.UserFiles.Where(x => x.Name == fileName).FirstOrDefault();
-			if (file == null)
-			{
-				return NotFound();
-			}
-
-			try
-			{
-				MemoryStream decryptedStream = new MemoryStream();
-				{
-					using (FileStream fileStream = new FileStream($"UserFiles\\1\\{file.DiskLocation}", FileMode.Open))
-					{
-						encryption.DecryptFile(fileStream, decryptedStream, file.Name);
-						decryptedStream.Seek(0, SeekOrigin.Begin);
-						return File(decryptedStream, System.Net.Mime.MediaTypeNames.Application.Octet, file.Name);
-
-					}
-				}
-			}
-			catch (FileNotFoundException ex)
-			{
-				_context.Remove(file);
-				_context.SaveChanges();
-				throw new Exception("file corrupted");
-			}
-			catch (Exception ex)
-			{
-				return Ok(123);
-			}
-		}
-
-		/// <summary>
-		/// Удаление файла
-		/// </summary>
-		/// <returns></returns>
-		[HttpDelete("delete")]
-		public async Task<ActionResult> Delete(string fileName)
-		{
-			var file = _context.UserFiles.Where(x => x.Name == fileName).FirstOrDefault();
-			if (file == null)
-			{
-				return NotFound();
-			}
-
-			System.IO.File.Delete($"UserFiles\\1\\{file.DiskLocation}");
-			_context.Remove(file);
-			_context.SaveChanges();
-			return Ok();
-		}
-	}
+                }
+                
+                _context.UserFiles.Add(new Models.UserFile { DiskLocation = $"{hash}", Name = file.FileName, Owner = _context.Users.First() });
+            }
+            _context.SaveChanges();
+            return Ok(_context.UserFiles.Where(x => x.Id == 1).ToList());
+        }
+        /// <summary>
+        /// РЎРєР°С‡РёРІР°РЅРёРµ С„Р°Р№Р»Р°
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("download")]
+        public async Task<ActionResult> Download([FromServices] EncryptionService encryption, string fileName)
+        {
+            var file = _context.UserFiles.Where(x=>x.Name==fileName).FirstOrDefault();
+            if (file == null) return NotFound();
+            try
+            {
+                MemoryStream decryptedStream = new MemoryStream();
+                {
+                    using (FileStream fileStream = new FileStream($"UserFiles\\1\\{file.DiskLocation}", FileMode.Open))
+                    {
+                        encryption.DecryptFile(fileStream, decryptedStream, file.Name);
+                        decryptedStream.Seek(0, SeekOrigin.Begin);
+                        return File(decryptedStream, System.Net.Mime.MediaTypeNames.Application.Octet, file.Name);
+                        
+                    }
+                }
+            } catch (FileNotFoundException ex)
+            {
+                _context.Remove(file);
+                _context.SaveChanges();
+                throw new Exception("file corrupted");
+            }
+            catch (Exception ex)
+            {
+                return Ok(123);
+            }
+        }
+        /// <summary>
+        /// РЈРґР°Р»РµРЅРёРµ С„Р°Р№Р»Р°
+        /// </summary>
+        /// <returns></returns>
+        [HttpDelete("delete")]
+        public async Task<ActionResult> Delete(string fileName)
+        {
+            var file = _context.UserFiles.Where(x => x.Name == fileName).FirstOrDefault();
+            if (file == null) return NotFound();
+            System.IO.File.Delete($"UserFiles\\1\\{file.DiskLocation}");
+            _context.Remove(file);
+            _context.SaveChanges();
+            return Ok();
+        }
+    }
 }
