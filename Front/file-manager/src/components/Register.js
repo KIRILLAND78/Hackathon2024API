@@ -1,17 +1,52 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
-function Register() {
+function Register({ onRegister }) {
   const [email, setEmail] = useState('');
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  const handleLogin = async () => {
+    try {
+      const response = await fetch('https://localhost:7248/api/Auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const result = await response.json();
+      if (!result.isSuccess) {
+        throw new Error(result.errorMessage || 'Login failed');
+      }
+
+      const resultData = result.data;
+      localStorage.setItem('accessToken', resultData.accessToken);
+      localStorage.setItem('refreshToken', resultData.refreshToken);
+
+      const decodedToken = jwtDecode(resultData.accessToken);
+      const userData = {
+        email: decodedToken["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"],
+        isAdmin: decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] === 'Admin'
+      };
+
+      onRegister(userData);
+      navigate('/files');
+    } catch (error) {
+      setError(error.message);
+      setTimeout(() => setError(''), 3000);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      alert("Passwords don't match");
+      setError('Passwords do not match');
       return;
     }
 
@@ -24,20 +59,23 @@ function Register() {
         body: JSON.stringify({ email, login, password }),
       });
 
-      if (!response.ok) {
-        throw new Error('Registration failed');
+      const result = await response.json();
+      if (!result.isSuccess) {
+        throw new Error(result.errorMessage || 'Registration failed');
       }
 
-      navigate('/login');
+      // Если регистрация успешна, выполнить логин
+      await handleLogin();
     } catch (error) {
-      alert('Error registering user');
+      setError(error.message);
+      setTimeout(() => setError(''), 3000);
     }
   };
 
   return (
     <div className="register-container">
       <h2>Register</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className={error ? 'error' : ''}>
         <input
           type="email"
           value={email}
@@ -66,9 +104,10 @@ function Register() {
           placeholder="Confirm Password"
           required
         />
+        {error && <p className="error-message">{error}</p>}
         <button type="submit">Register</button>
       </form>
-      <button onClick={() => navigate('/login')}>Перейти назад в логин</button>
+      <button onClick={() => navigate('/login')}>Back to Login</button>
     </div>
   );
 }

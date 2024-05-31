@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
 function Login({ onLogin }) {
   const [email, setEmail] = useState('');
@@ -18,11 +19,21 @@ function Login({ onLogin }) {
         body: JSON.stringify({ email, password }),
       });
 
-      if (!response.ok) {
-        throw new Error('Login failed');
+      const result = await response.json();
+      if (!result.isSuccess) {
+        throw new Error(result.errorMessage || 'Login failed');
       }
 
-      const userData = await response.json();
+      const resultData = result.data;
+      localStorage.setItem('accessToken', resultData.accessToken);
+      localStorage.setItem('refreshToken', resultData.refreshToken);
+
+      const decodedToken = jwtDecode(resultData.accessToken);
+      const userData = {
+        email: decodedToken["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"],
+        isAdmin: decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] === 'Admin'
+      };
+
       onLogin(userData);
     } catch (error) {
       setError(true);
