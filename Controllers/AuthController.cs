@@ -1,16 +1,31 @@
+using Hackathon2024API.DTO.User;
+using Hackathon2024API.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
+
 
 namespace Hackathon2024API.Controllers;
 
-
 [ApiController]
-[Route("api/[controller]")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
 public class AuthController : ControllerBase
 {
+	private readonly IAuthService _authService;
 
-    [HttpPost]
-    public async Task<IActionResult> Register()
-    {
-        return Ok();
-    }
+	public AuthController(IAuthService authService)
+	{
+		_authService = authService;
+	}
+
+	[HttpPost("register")]
+	public async Task<ActionResult<UserDto>> Register(RegisterUserDto dto)
+	{
+		var response = await _authService.Register(dto);
+		if (response.IsSuccess)
+		{
+			return Ok(response);
+		}
+
+		return BadRequest(response);
+	}
 }
