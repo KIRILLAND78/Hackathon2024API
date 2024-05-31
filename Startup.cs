@@ -1,7 +1,10 @@
 using System.Text;
+using Hackathon2024API.Controllers;
 using Hackathon2024API.Data;
 using Hackathon2024API.Data.Settings;
 using Hackathon2024API.Models;
+using log4net;
+using log4net.Config;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -19,8 +22,10 @@ public static class Startup
             var audience = options.Audience;
             
             services.AddAuthorization();
-            
-            services.AddCors(options =>
+
+		services.AddSingleton<ILog>(LogManager.GetLogger(typeof(FileController)));
+
+		services.AddCors(options =>
             {
                 options.AddPolicy("AllowNgrok",
                     builder =>
@@ -55,7 +60,7 @@ public static class Startup
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = issuer,
                     ValidAudience = audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("sadkfaksdfklsdafmaksdfkmasldkfm"))
                 };
             });
         }
@@ -91,8 +96,10 @@ public static class Startup
                     new string[] {}
                 }
             });
+
                 
         });
     }
 
+   
 }
