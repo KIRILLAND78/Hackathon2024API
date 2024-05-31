@@ -1,10 +1,10 @@
 ﻿using Hackathon2024API.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace Hackathon2024API.Data.Models
 {
-    public class Role
+    public class Role : IdentityRole<long>
     {
-        public long Id { get; set; }
         public string Title { get; set; }
         
         

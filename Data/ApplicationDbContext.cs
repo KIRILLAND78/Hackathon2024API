@@ -21,16 +21,17 @@ namespace Hackathon2024API.Data
         public DbSet<UserFile> UserFiles { get; set; }
         
         public DbSet<User> Users { get; set; }
+        public DbSet<Role> Roles { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<Role>().HasData(new Role { Title = "Admin", Id = 1 });
             builder.Entity<User>().HasData(new User { UserName = "Admin User", Email= "admin@mail.ru", Id=1 });
             builder.Entity<IdentityRole<long>>().HasData(
-                new IdentityRole<long> { Id = 1, Name = "User", NormalizedName = "USER" },
-                new IdentityRole<long> { Id = 2, Name = "Admin", NormalizedName = "ADMIN" }
+                new IdentityRole<long> { Id = 1, Name = "Admin", NormalizedName = "ADMIN" },
+                new IdentityRole<long> { Id = 2, Name = "User", NormalizedName = "USER" }
             );        }
     }
 }

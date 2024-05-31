@@ -5,7 +5,6 @@ namespace Hackathon2024API.Models
 {
     public class User : IdentityUser<long>
     {
-        public long Id { get; set; }
         
         public short MaxFilesCount { get; set; }
         
@@ -16,7 +15,6 @@ namespace Hackathon2024API.Models
         public bool CanChange { get; set; }
         
         public bool CanDelete { get; set; }
-        
         
         public virtual ICollection<UserFile> Files { get; set; }
         
