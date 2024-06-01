@@ -14,6 +14,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Processing;
 using Hackathon2024API.Data.DTO;
+using Microsoft.AspNetCore.Http;
 
 namespace Hackathon2024API.Controllers
 {
@@ -48,11 +49,11 @@ namespace Hackathon2024API.Controllers
         ApplicationDbContext _context;
         UserManager<User> _userManager;
         User user;
-        public FileController(ApplicationDbContext context, ILog logger, UserManager<User> userManager) {
+        public FileController(ApplicationDbContext context, ILog logger, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor) {
             _context = context;
             log = logger;
             _userManager = userManager;
-			user = _userManager.FindByEmailAsync(HttpContext.User.Claims.First(x => x.Type == ClaimTypes.Email).Value).Result!;
+			user = _userManager.FindByEmailAsync(httpContextAccessor.HttpContext.User.Claims.First(x => x.Type == ClaimTypes.Email).Value).Result!;
         }
 
 

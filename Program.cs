@@ -8,6 +8,7 @@ using log4net.Config;
 using Hackathon2024API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Hackathon2024API.Data.Models;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,12 +18,17 @@ builder.Services.AddAuthenticationAndAuthorization(builder);
 builder.Services.AddScoped<IAuthService, AuthSrevice>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IBaseRepository<User>, BaseRepository<User>>();
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    options.JsonSerializerOptions.WriteIndented = true;
+}); ;
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwagger();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<EncryptionCompressionService>();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
