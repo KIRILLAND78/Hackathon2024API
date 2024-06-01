@@ -84,26 +84,26 @@ namespace Hackathon2024API.Controllers
 				foreach (var file in files)
                 {
                     var extension = System.IO.Path.GetExtension(file.FileName);
-					if (!_context.FileExtentions.Any(x => x.Title == extension && x.Users.Any(z => z.Id == user.Id))){
+					if (!_context.FileExtentions.Any(x => x.Title == extension) || !_context.Users.Any(z => z.Id == user.Id)){
                         results.Add(file.FileName, "Этот тип файла не разрешен к загрузке");
                         continue;
                     }
-                    if (!user.CanUpload)
-                    {
-                        results.Add(file.FileName, "Нет прав для загрузки файлов");
-                        continue;
-                    }
+					if (!user.CanUpload)
+					{
+						results.Add(file.FileName, "Нет прав для загрузки файлов");
+						continue;
+					}
 					if (user.MaxFilesCount >= _context.UserFiles.Where(x => x.OwnerId == user.Id).Count())
-                    {
-                        results.Add(file.FileName, "Достигнуто максимальное количество возможных хранимых на сервере файлов");
-                        continue;
-                    }
-                    if (user.MaxFileSizeMb < ((float)file.Length)/1024/1024)
-                    {
-                        results.Add(file.FileName, "Превышен максимальный размер загружаемого файла");
-                        continue;
-                    }
-                    var hash = file.GetHash();
+					{
+						results.Add(file.FileName, "Достигнуто максимальное количество возможных хранимых на сервере файлов");
+						continue;
+					}
+					if (user.MaxFileSizeMb < ((float)file.Length) / 1024 / 1024)
+					{
+						results.Add(file.FileName, "Превышен максимальный размер загружаемого файла");
+						continue;
+					}
+					var hash = file.GetHash();
 
 					if (_context.UserFiles.Any(file => file.DiskLocation == hash))
 					{
@@ -145,7 +145,7 @@ namespace Hackathon2024API.Controllers
 
 						}
 
-						_context.UserFiles.Add(new UserFile { DiskLocation = $"{hash}", Encrypted=user.MandatoryEncryption, Name = file.FileName, Owner = _context.Users.First() });
+						_context.UserFiles.Add(new UserFile { DiskLocation = $"{hash}", Encrypted=user.MandatoryEncryption, Name = file.FileName, Owner = user });
 
                         results.Add(file.FileName, "Файл успешно загружен");
                     } catch(Exception ex)
