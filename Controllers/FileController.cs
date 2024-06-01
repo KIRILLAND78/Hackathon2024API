@@ -72,7 +72,7 @@ namespace Hackathon2024API.Controllers
         [HttpGet("MyFiles")]
         public async Task<ActionResult> MyFiles([FromQuery]PaginationDTO pg)
         {
-            return Ok(_context.UserFiles.Where(x=>x.Id==user.Id).Skip(pg.Count*pg.Page).Take(pg.Count).Select(x => new { x.Id, x.DiskLocation, x.Encrypted, x.Name, x.OwnerId }).ToList());
+            return Ok(_context.UserFiles.Where(x=>x.OwnerId==user.Id).Skip(pg.Count*pg.Page).Take(pg.Count).Select(x => new { x.Id, x.DiskLocation, x.Encrypted, x.Name, x.OwnerId }).ToList());
         }
 
 
