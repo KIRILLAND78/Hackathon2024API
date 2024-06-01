@@ -77,3 +77,23 @@
 .error-message {
   color: red;
 }
+
+.admin-panel-container {
+  padding: 20px;
+}
+
+.user-card {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  background-color: #f9f9f9;
+}
+
+.user-card h2 {
+  margin-top: 0;
+}
+
+.user-card p {
+  margin: 5px 0;
+}
