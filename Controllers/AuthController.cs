@@ -1,7 +1,12 @@
+using Hackathon2024API.Data.Models;
 using Hackathon2024API.Data.Settings;
 using Hackathon2024API.DTO.User;
 using Hackathon2024API.Interfaces.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 
 namespace Hackathon2024API.Controllers;
@@ -39,7 +44,15 @@ public class AuthController : ControllerBase
 		{
 			return Ok(response);
 		}
+        return BadRequest(response);
+    }
 
-		return BadRequest(response);
-	}
+	[Authorize]
+    [HttpPost("user")]
+    public async Task<ActionResult<Token>> UserInfo([FromServices] UserManager<User> userManager, [FromServices] IHttpContextAccessor httpContextAccessor)
+    {
+        
+        var user = userManager.FindByEmailAsync(httpContextAccessor.HttpContext.User.Claims.First(x => x.Type == ClaimTypes.Email).Value).Result!;
+        return Ok(user);
+    }
 }
