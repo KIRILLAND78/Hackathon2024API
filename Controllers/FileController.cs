@@ -60,7 +60,7 @@ namespace Hackathon2024API.Controllers
         [HttpGet]
         public async Task<ActionResult> Index([FromQuery] PaginationDTO pg) 
 		{
-			if (user.CanRead || _userManager.GetRolesAsync(user).Result.Contains("admin"))
+			if (user.CanRead || _userManager.GetRolesAsync(user).Result.Contains("Admin"))
 			{
                 return Ok(_context.UserFiles.Skip(pg.Count * pg.Page).Take(pg.Count).ToList());
             }
@@ -177,7 +177,7 @@ namespace Hackathon2024API.Controllers
                 var file = _context.UserFiles.Where(x => x.Name == fileName).FirstOrDefault();
 				if (file == null) return NotFound();
 
-                if (!(user.CanRead || file.OwnerId==user.Id || _userManager.GetRolesAsync(user).Result.Contains("admin")))
+                if (!(user.CanRead || file.OwnerId==user.Id || _userManager.GetRolesAsync(user).Result.Contains("Admin")))
                 {
                     return Unauthorized();
                 }
