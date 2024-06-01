@@ -26,8 +26,8 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 }); ;
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddLogging(builder=>
-builder.AddLog4Net("log4net.config"));
+builder.Logging.ClearProviders();
+builder.Logging.AddLog4Net();
 builder.Services.AddSwagger();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
@@ -49,7 +49,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-XmlConfigurator.Configure(new FileInfo("log4net.config"));
+log4net.Config.XmlConfigurator.Configure(new FileInfo("log4net.config"));
 
 app.UseHttpsRedirection();
 

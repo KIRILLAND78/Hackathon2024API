@@ -45,12 +45,12 @@ namespace Hackathon2024API.Controllers
     [Authorize(AuthenticationSchemes = "Bearer")]
     public class FileController : ControllerBase
     {
-        private static ILog log;
+        private static ILogger<FileController> log;
 
         ApplicationDbContext _context;
         UserManager<User> _userManager;
         User user;
-        public FileController(ApplicationDbContext context, ILog logger, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor) {
+        public FileController(ApplicationDbContext context, ILogger<FileController> logger, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor) {
             _context = context;
             log = logger;
             _userManager = userManager;
@@ -163,12 +163,12 @@ namespace Hackathon2024API.Controllers
                     }
 				}
 				_context.SaveChanges();
-				log.Info($"Попытка загрузки {files.Count} файлов");
+				log.LogInformation($"Попытка загрузки {files.Count} файлов");
 				return Ok(results);
 			}
 			catch (Exception ex)
 			{
-				log.Error($"Ошибка при загрузке файла: {ex.Message}");
+				log.LogError($"Ошибка при загрузке файла: {ex.Message}");
 				return Problem();
 			}
 		}
@@ -181,7 +181,7 @@ namespace Hackathon2024API.Controllers
 		{
 			try
 			{
-				log.Info($"Запрос на скачивание файла ({id}: {fileName}) пользователем {user.Id}");
+				log.LogInformation($"Запрос на скачивание файла ({id}: {fileName}) пользователем {user.Id}");
 
                 var file = _context.UserFiles.Where(x => x.Name == fileName && x.OwnerId==id).FirstOrDefault();
 				if (file == null) return NotFound();
@@ -198,7 +198,7 @@ namespace Hackathon2024API.Controllers
 						encryption.DecryptDecompressFile(fileStream, decryptedStream, file.Name);
 						else encryption.DecompressFile(fileStream, decryptedStream, file.Name);
 						decryptedStream.Seek(0, SeekOrigin.Begin);
-						log.Info($"Файл ({id}: {fileName}) успешно скачан пользователем {user.Id}");
+						log.LogInformation($"Файл ({id}: {fileName}) успешно скачан пользователем {user.Id}");
 						return File(decryptedStream, System.Net.Mime.MediaTypeNames.Application.Octet, file.Name);
 
 					}
@@ -206,7 +206,7 @@ namespace Hackathon2024API.Controllers
 			}
 			catch (FileNotFoundException ex)
 			{
-				log.Error($"Файл ({id}: {fileName}) не найден: {ex.Message}");
+				log.LogError($"Файл ({id}: {fileName}) не найден: {ex.Message}");
 				var file = _context.UserFiles.Where(x => x.Name == fileName).FirstOrDefault();
 				if (file != null)
 				{
@@ -217,7 +217,7 @@ namespace Hackathon2024API.Controllers
 			}
 			catch (Exception ex)
 			{
-				log.Error($"Ошибка при скачивании файла ({id}: {fileName}): {ex.Message}");
+				log.LogError($"Ошибка при скачивании файла ({id}: {fileName}): {ex.Message}");
 				return Problem();
 			}
 		}
@@ -228,19 +228,19 @@ namespace Hackathon2024API.Controllers
                 return Unauthorized();
             try
 			{
-				log.Info($"Запрос на удаление файла ({id}: {fileName})");
+				log.LogInformation($"Запрос на удаление файла ({id}: {fileName})");
 				var file = _context.UserFiles.Where(x => x.Name == fileName && x.OwnerId==id).FirstOrDefault();
 				if (file == null)
                     return NotFound();
 				System.IO.File.Delete($"UserFiles\\{id}\\{file.DiskLocation}");
 				_context.Remove(file);
 				_context.SaveChanges();
-				log.Info($"Файл ({id}: {fileName}) успешно удален пользователем {user.Id}");
+				log.LogInformation($"Файл ({id}: {fileName}) успешно удален пользователем {user.Id}");
 				return Ok();
 			}
 			catch (Exception ex)
 			{
-				log.Error($"Ошибка при удалении файла ({id}: {fileName}): {ex.Message}");
+				log.LogError($"Ошибка при удалении файла ({id}: {fileName}): {ex.Message}");
 				return Problem();
 			}
 		}
