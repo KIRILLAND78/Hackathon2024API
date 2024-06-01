@@ -5,6 +5,7 @@ using Hackathon2024API.Interfaces.Services;
 using Hackathon2024API.Repository;
 using Hackathon2024API.Services;
 using log4net.Config;
+using log4net;
 using Hackathon2024API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Hackathon2024API.Data.Models;
@@ -25,7 +26,8 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 }); ;
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-
+builder.Services.AddLogging(builder=>
+builder.AddLog4Net("log4net.config"));
 builder.Services.AddSwagger();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();

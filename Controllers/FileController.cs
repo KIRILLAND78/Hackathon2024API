@@ -156,7 +156,7 @@ namespace Hackathon2024API.Controllers
 
 						_context.UserFiles.Add(new UserFile { DiskLocation = $"{hash}", Encrypted=user.MandatoryEncryption, Name = file.FileName, Owner = user });
 
-                        results.Add(file.FileName, "Файл успешно загружен");
+                        results.Add(file.FileName, $"Файл успешно {file.FileName} загружен пользователем {user.Id}");
                     } catch(Exception ex)
                     {
                         results.Add(file.FileName, ex.Message);
@@ -235,7 +235,7 @@ namespace Hackathon2024API.Controllers
 				System.IO.File.Delete($"UserFiles\\{id}\\{file.DiskLocation}");
 				_context.Remove(file);
 				_context.SaveChanges();
-				log.Info($"Файл {fileName} успешно удален");
+				log.Info($"Файл ({id}: {fileName}) успешно удален пользователем {user.Id}");
 				return Ok();
 			}
 			catch (Exception ex)
