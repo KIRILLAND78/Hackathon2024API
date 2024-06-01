@@ -8,7 +8,7 @@ function FileList({ user, onLogout }) {
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const response = await fetch(`https://localhost:7248/api/File/MyFiles?Count=10&Page=0`, {
+        const response = await fetch(`https://localhost:7248/File/MyFiles?Count=5&Page=0`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
@@ -50,26 +50,16 @@ function FileList({ user, onLogout }) {
       ) : error ? (
         <p className="error-message">{error}</p>
       ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Disk Location (Hash)</th>
-              <th>Encrypted</th>
-              <th>Owner ID</th>
-            </tr>
-          </thead>
-          <tbody>
-            {files.map((file) => (
-              <tr key={file.id}>
-                <td>{file.name}</td>
-                <td>{file.diskLocation}</td>
-                <td>{file.encrypted ? 'Yes' : 'No'}</td>
-                <td>{file.ownerId}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="files-grid">
+          {files.map((file) => (
+            <div key={file.id} className="file-card">
+              <p><strong>Name:</strong> {file.name}</p>
+              <p><strong>Disk Location (Hash):</strong> {file.diskLocation}</p>
+              <p><strong>Encrypted:</strong> {file.encrypted ? 'Yes' : 'No'}</p>
+              <p><strong>Owner ID:</strong> {file.ownerId}</p>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );

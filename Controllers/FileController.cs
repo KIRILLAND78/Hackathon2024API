@@ -84,28 +84,30 @@ namespace Hackathon2024API.Controllers
 				Dictionary<string, string> results = new();
 				foreach (var file in files)
                 {
-					if (!_userManager.GetRolesAsync(user).Result.Contains("Admin")) {
-                    var extension = System.IO.Path.GetExtension(file.FileName);
-					if (!_context.FileExtentions.Include(x=>x.Users).Any(x => x.Title == extension && x.Users.Any(z => z.Id == user.Id))){
-                        results.Add(file.FileName, "Этот тип файла не разрешен к загрузке");
-                        continue;
-                    }
-                    if (!user.CanUpload)
-                    {
-                        results.Add(file.FileName, "Нет прав для загрузки файлов");
-                        continue;
-                    }
-					if (user.MaxFilesCount <= _context.UserFiles.Where(x => x.OwnerId == user.Id).Count())
-                    {
-                        results.Add(file.FileName, "Достигнуто максимальное количество возможных хранимых на сервере файлов");
-                        continue;
-                    }
-                    if (user.MaxFileSizeMb < ((float)file.Length)/1024/1024)
-                    {
-                        results.Add(file.FileName, "Превышен максимальный размер загружаемого файла");
-                        continue;
-                    }
-                    }
+					if (!_userManager.GetRolesAsync(user).Result.Contains("Admin")) 
+					{
+						var extension = System.IO.Path.GetExtension(file.FileName);
+						if (!_context.FileExtentions.Include(x => x.Users).Any(x => x.Title == extension && x.Users.Any(z => z.Id == user.Id)))
+						{
+							results.Add(file.FileName, "Этот тип файла не разрешен к загрузке");
+							continue;
+						}
+						if (!user.CanUpload)
+						{
+							results.Add(file.FileName, "Нет прав для загрузки файлов");
+							continue;
+						}
+						if (user.MaxFilesCount <= _context.UserFiles.Where(x => x.OwnerId == user.Id).Count())
+						{
+							results.Add(file.FileName, "Достигнуто максимальное количество возможных хранимых на сервере файлов");
+							continue;
+						}
+						if (user.MaxFileSizeMb < ((float)file.Length) / 1024 / 1024)
+						{
+							results.Add(file.FileName, "Превышен максимальный размер загружаемого файла");
+							continue;
+						}
+					}
 
                     string hash = file.GetHash();
 
