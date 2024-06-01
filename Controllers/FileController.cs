@@ -154,8 +154,8 @@ namespace Hackathon2024API.Controllers
                     }
 				}
 				_context.SaveChanges();
-				log.Info($"Загружено {files.Count} файлов");
-				return Ok(_context.UserFiles.Where(x => x.Id == 1).ToList());
+				log.Info($"Попытка загрузки {files.Count} файлов");
+				return Ok(results);
 			}
 			catch (Exception ex)
 			{
