@@ -2,6 +2,7 @@
 using Hackathon2024API.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Hackathon2024API.Controllers
 {
@@ -20,14 +21,14 @@ namespace Hackathon2024API.Controllers
         [HttpGet("User")]
         public IActionResult User([FromQuery] long id)
         {
-            var user = _context.Users.Where(x => x.Id == id).FirstOrDefault();
+            var user = _context.Users.Where(x => x.Id == id).Include(x=>x.FileExtention).FirstOrDefault();
             if (user == null) return NotFound();
             return Ok(user.FileExtention.ToList());
         }
         [HttpPost("User")]
         public IActionResult UserPost([FromQuery] long id, [FromQuery] long extentionId)
         {
-            var user = _context.Users.Where(x => x.Id == id).FirstOrDefault();
+            var user = _context.Users.Where(x => x.Id == id).Include(x => x.FileExtention).FirstOrDefault();
             if (user == null) return NotFound("User not found");
             var extention = _context.FileExtentions.Where(x => x.Id == extentionId).FirstOrDefault();
             if (extention == null) return NotFound("Extention not found");
@@ -38,7 +39,7 @@ namespace Hackathon2024API.Controllers
         [HttpDelete("User")]
         public IActionResult UserDelete([FromQuery] long id, [FromQuery] long extentionId)
         {
-            var user = _context.Users.Where(x => x.Id == id).FirstOrDefault();
+            var user = _context.Users.Where(x => x.Id == id).Include(x => x.FileExtention).FirstOrDefault();
             if (user == null) return NotFound("User not found");
             var extention = _context.FileExtentions.Where(x => x.Id == extentionId).FirstOrDefault();
             if (extention == null) return NotFound("Extention not found");
