@@ -6,6 +6,8 @@ public record LimitSettings(
     short MaxFilesCount,
     bool CanUpload,
     bool CanRead,
+    byte ImageQuality,
     bool CanChange,
-    bool CanDelete
+    bool CanDelete,
+    int MaxFileSizeMb
     );

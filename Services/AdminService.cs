@@ -1,5 +1,5 @@
 using Hackathon2024API.DTO.User;
-using Hackathon2024API.Models;
+using Hackathon2024API.Data.Models;
 using Hackathon2024API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,11 +26,14 @@ public class AdminService : IAdminService
             }
             
             user.MaxFilesCount = limitSettings.MaxFilesCount;
-            user.CanChange = limitSettings.CanChange;
+            //user.CanChange = limitSettings.CanChange;
             user.CanUpload = limitSettings.CanUpload;
             user.CanRead = limitSettings.CanRead;
+            user.ImageQuality = limitSettings.ImageQuality;
+            user.CanUpload = limitSettings.CanUpload;
             user.CanDelete = limitSettings.CanDelete;
-            
+            user.MaxFileSizeMb = limitSettings.MaxFileSizeMb;
+
             await _baseRepository.UpdateAsync(user);
         }
         catch (Exception e)

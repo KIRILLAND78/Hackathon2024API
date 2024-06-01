@@ -3,13 +3,21 @@ using System.Security.Cryptography;
 
 namespace Hackathon2024API.Services
 {
-    public class EncryptionService
+    public class EncryptionCompressionService
     {
-        public EncryptionService() { }
+        public EncryptionCompressionService() { }
 
         public readonly byte[] salt = new byte[] { 0xA0, 0x1A, 0xBB, 0xEA, 0x0B, 0x02, 0x12, 0x10 };
         public const int iterations = 1001;
-        public void DecryptFile(Stream source, Stream destination, string password)
+        public void DecompressFile(Stream source, Stream destination, string password)
+        {
+
+            using (GZipStream decompressionStream = new GZipStream(source, CompressionMode.Decompress))
+            {
+                decompressionStream.CopyTo(destination);
+            }
+        }
+        public void DecryptDecompressFile(Stream source, Stream destination, string password)
         {
             AesManaged aes = new AesManaged();
             aes.BlockSize = aes.LegalBlockSizes[0].MaxSize;
@@ -20,8 +28,6 @@ namespace Hackathon2024API.Services
             aes.Mode = CipherMode.CBC;
             ICryptoTransform transform = aes.CreateDecryptor(aes.Key, aes.IV);
 
-            var v = new MemoryStream();
-
             using (CryptoStream cryptoStream = new CryptoStream(source, transform, CryptoStreamMode.Read))
             {
                 using (GZipStream decompressionStream = new GZipStream(cryptoStream, CompressionMode.Decompress))
@@ -30,7 +36,15 @@ namespace Hackathon2024API.Services
                 }
             }
         }
-        public void EncryptFile(Stream source, Stream destination, string password)
+        public void CompressFile(Stream source, Stream destination, string password)
+        {
+            using (GZipStream compressionStream = new GZipStream(destination, CompressionLevel.SmallestSize))
+            {
+                source.CopyTo(compressionStream);
+                //compressionStream.CopyTo(cryptoStream);
+            }
+        }
+        public void EncryptCompressFile(Stream source, Stream destination, string password)
         {
         AesManaged aes = new AesManaged();
             aes.BlockSize = aes.LegalBlockSizes[0].MaxSize;

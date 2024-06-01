@@ -2,12 +2,12 @@ using Hackathon2024API;
 using Hackathon2024API.Data;
 using Hackathon2024API.Data.Settings;
 using Hackathon2024API.Interfaces.Services;
-using Hackathon2024API.Models;
 using Hackathon2024API.Repository;
 using Hackathon2024API.Services;
 using log4net.Config;
 using Hackathon2024API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Hackathon2024API.Data.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +23,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwagger();
 builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<EncryptionService>();
+builder.Services.AddSingleton<EncryptionCompressionService>();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));

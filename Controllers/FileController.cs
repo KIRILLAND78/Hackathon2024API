@@ -5,8 +5,15 @@ using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
 using log4net;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Hackathon2024API.Models;
 using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
+using Hackathon2024API.Data.Models;
+using static System.Net.Mime.MediaTypeNames;
+using System.Text;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Processing;
+using Hackathon2024API.Data.DTO;
 
 namespace Hackathon2024API.Controllers
 {
@@ -45,57 +52,105 @@ namespace Hackathon2024API.Controllers
             _context = context;
             log = logger;
             _userManager = userManager;
-            //user = _userManager.GetUserId(HttpContext.User.Claims.getC)
+			user = _userManager.FindByEmailAsync(HttpContext.User.Claims.First(x => x.Type == ClaimTypes.Email).Value).Result!;
         }
-        /// <summary>
-        /// ���������� ������ ���� ������
-        /// </summary>
-        /// <returns></returns>
+
+
         [HttpGet]
-        public async Task<ActionResult> Index() 
+        public async Task<ActionResult> Index([FromQuery] PaginationDTO pg) 
 		{
-            return Ok(_context.UserFiles.ToList());
+			if (user.CanRead || _userManager.GetRolesAsync(user).Result.Contains("admin"))
+			{
+                return Ok(_context.UserFiles.Skip(pg.Count * pg.Page).Take(pg.Count).ToList());
+            }
+            return Unauthorized();
         }
-        /// <summary>
-        /// ���������� ������ ������ ������������
-        /// </summary>
-        /// <returns></returns>
+
+
         [HttpGet("MyFiles")]
-        public async Task<ActionResult> MyFiles()
+        public async Task<ActionResult> MyFiles([FromQuery]PaginationDTO pg)
         {
-            return Ok(_context.UserFiles.Where(x=>x.Id==1).ToList());
+            return Ok(_context.UserFiles.Where(x=>x.Id==user.Id).Skip(pg.Count*pg.Page).Take(pg.Count).ToList());
         }
-        /// <summary>
-        /// �������� �����
-        /// </summary>
-        /// <returns></returns>
+
+
         [HttpPut]
-		public async Task<ActionResult> Upload([FromServices] EncryptionService encryption, List<IFormFile> files)
+		public async Task<ActionResult> Upload([FromServices] EncryptionCompressionService encryption, List<IFormFile> files)
 		{
 			try
 			{
+				Dictionary<string, string> results = new();
 				foreach (var file in files)
-				{
-					var hash = file.GetHash();
+                {
+                    var extension = System.IO.Path.GetExtension(file.FileName);
+					if (!_context.FileExtentions.Any(x => x.Title == extension && x.Users.Any(z => z.Id == user.Id))){
+                        results.Add(file.FileName, "Этот тип файла не разрешен к загрузке");
+                        continue;
+                    }
+                    if (!user.CanUpload)
+                    {
+                        results.Add(file.FileName, "Нет прав для загрузки файлов");
+                        continue;
+                    }
+					if (user.MaxFilesCount >= _context.UserFiles.Where(x => x.OwnerId == user.Id).Count())
+                    {
+                        results.Add(file.FileName, "Достигнуто максимальное количество возможных хранимых на сервере файлов");
+                        continue;
+                    }
+                    if (user.MaxFileSizeMb < ((float)file.Length)/1024/1024)
+                    {
+                        results.Add(file.FileName, "Превышен максимальный размер загружаемого файла");
+                        continue;
+                    }
+                    var hash = file.GetHash();
 
 					if (_context.UserFiles.Any(file => file.DiskLocation == hash))
 					{
-						continue;
+                        results.Add(file.FileName, "Файл уже существует");
+                        continue;
 					}
 
-					using (var stream = file.OpenReadStream())
+                    try
 					{
-						Directory.CreateDirectory("UserFiles\\1");
-						stream.Seek(0, SeekOrigin.Begin);
-
-						using (var fileStream = new FileStream($"UserFiles\\1\\{hash}", FileMode.OpenOrCreate))
+						using (var stream = file.OpenReadStream())
 						{
-							encryption.EncryptFile(stream, fileStream, file.FileName);
+							try
+							{
+                                if (user.ImageQuality < 100 && user.ImageQuality>0)
+                                    using (var image = SixLabors.ImageSharp.Image.Load(stream))
+                                    {
+                                        var encoder = new JpegEncoder
+                                        {
+                                            Quality = user.ImageQuality
+                                        };
+                                        image.Save(stream, encoder);
+                                    }
+
+                            }
+							catch
+							{
+								//не картинка, ничего, идем дальше
+							}
+							Directory.CreateDirectory($"UserFiles\\{user.Id}");
+							stream.Seek(0, SeekOrigin.Begin);
+
+							using (var fileStream = new FileStream($"UserFiles\\{user.Id}\\{hash}", FileMode.OpenOrCreate))
+							{
+								if (user.MandatoryEncryption)
+									encryption.EncryptCompressFile(stream, fileStream, file.FileName);
+								else
+									encryption.CompressFile(stream, fileStream, file.FileName);
+							}
+
 						}
 
-					}
+						_context.UserFiles.Add(new UserFile { DiskLocation = $"{hash}", Encrypted=user.MandatoryEncryption, Name = file.FileName, Owner = _context.Users.First() });
 
-					_context.UserFiles.Add(new Models.UserFile { DiskLocation = $"{hash}", Name = file.FileName, Owner = _context.Users.First() });
+                        results.Add(file.FileName, "Файл успешно загружен");
+                    } catch(Exception ex)
+                    {
+                        results.Add(file.FileName, ex.Message);
+                    }
 				}
 				_context.SaveChanges();
 				log.Info($"Загружено {files.Count} файлов");
@@ -112,19 +167,26 @@ namespace Hackathon2024API.Controllers
 		/// </summary>
 		/// <returns></returns>
 		[HttpGet("download")]
-		public async Task<ActionResult> Download([FromServices] EncryptionService encryption, string fileName)
+		public async Task<ActionResult> Download([FromServices] EncryptionCompressionService encryption, string fileName)
 		{
 			try
 			{
 				log.Info($"Запрос на скачивание файла {fileName}");
-				var file = _context.UserFiles.Where(x => x.Name == fileName).FirstOrDefault();
+
+                var file = _context.UserFiles.Where(x => x.Name == fileName).FirstOrDefault();
 				if (file == null) return NotFound();
 
-				MemoryStream decryptedStream = new MemoryStream();
+                if (!(user.CanRead || file.OwnerId==user.Id || _userManager.GetRolesAsync(user).Result.Contains("admin")))
+                {
+                    return Unauthorized();
+                }
+                MemoryStream decryptedStream = new MemoryStream();
 				{
-					using (FileStream fileStream = new FileStream($"UserFiles\\1\\{file.DiskLocation}", FileMode.Open))
+					using (FileStream fileStream = new FileStream($"UserFiles\\{user.Id}\\{file.DiskLocation}", FileMode.Open))
 					{
-						encryption.DecryptFile(fileStream, decryptedStream, file.Name);
+						if (file.Encrypted)
+						encryption.DecryptDecompressFile(fileStream, decryptedStream, file.Name);
+						else encryption.DecompressFile(fileStream, decryptedStream, file.Name);
 						decryptedStream.Seek(0, SeekOrigin.Begin);
 						log.Info($"Файл {fileName} успешно скачан");
 						return File(decryptedStream, System.Net.Mime.MediaTypeNames.Application.Octet, file.Name);
@@ -146,7 +208,7 @@ namespace Hackathon2024API.Controllers
 			catch (Exception ex)
 			{
 				log.Error($"Ошибка при скачивании файла {fileName}: {ex.Message}");
-				return Problem("Error");
+				return Problem();
 			}
 		}
 		/// <summary>
@@ -156,13 +218,15 @@ namespace Hackathon2024API.Controllers
 		[HttpDelete("delete")]
 		public async Task<ActionResult> Delete(string fileName)
 		{
-			try
+			if (!user.CanDelete)
+                return Unauthorized();
+            try
 			{
 				log.Info($"Запрос на удаление файла {fileName}");
 				var file = _context.UserFiles.Where(x => x.Name == fileName).FirstOrDefault();
 				if (file == null)
                     return NotFound();
-				System.IO.File.Delete($"UserFiles\\1\\{file.DiskLocation}");
+				System.IO.File.Delete($"UserFiles\\{user.Id}\\{file.DiskLocation}");
 				_context.Remove(file);
 				_context.SaveChanges();
 				log.Info($"Файл {fileName} успешно удален");
@@ -171,7 +235,7 @@ namespace Hackathon2024API.Controllers
 			catch (Exception ex)
 			{
 				log.Error($"Ошибка при удалении файла {fileName}: {ex.Message}");
-				return Problem("Error");
+				return Problem();
 			}
 		}
 	}

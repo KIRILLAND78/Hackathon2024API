@@ -2,7 +2,7 @@ using System.Text;
 using Hackathon2024API.Controllers;
 using Hackathon2024API.Data;
 using Hackathon2024API.Data.Settings;
-using Hackathon2024API.Models;
+using Hackathon2024API.Data.Models;
 using log4net;
 using log4net.Config;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

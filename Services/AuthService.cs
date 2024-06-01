@@ -5,7 +5,7 @@ using System.Text;
 using Hackathon2024API.Data.Settings;
 using Hackathon2024API.DTO.User;
 using Hackathon2024API.Interfaces.Services;
-using Hackathon2024API.Models;
+using Hackathon2024API.Data.Models;
 using Hackathon2024API.Result;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -93,7 +93,7 @@ namespace Hackathon2024API.Services
 
 			var token = new Token
 			{
-				AccessToken = GenerateAccessToken(dto.Email, _userManager.GetRolesAsync(user).Result.FirstOrDefault("User")),
+				AccessToken = GenerateAccessToken(user.Id, dto.Email, _userManager.GetRolesAsync(user).Result.FirstOrDefault("User")),
 				RefreshToken = ""
 			};
 				
@@ -105,12 +105,12 @@ namespace Hackathon2024API.Services
 				Data = token
 			};
 		}
-        private string GenerateAccessToken(string email, string role)
+        private string GenerateAccessToken(long id, string email, string role)
 		{
 			IEnumerable<Claim> claims = new List<Claim>()
-			{
-				new Claim(ClaimTypes.Email, email),
-
+            {
+                new Claim(ClaimTypes.NameIdentifier, $"{id}"),
+                new Claim(ClaimTypes.Email, email),
                 new Claim(ClaimTypes.Role, role)
             };
         

@@ -1,5 +1,4 @@
-﻿using Hackathon2024API.Models;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 
 namespace Hackathon2024API.Data.Models
 {

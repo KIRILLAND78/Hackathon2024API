@@ -1,5 +1,4 @@
 ﻿using Hackathon2024API.Data.Models;
-using Hackathon2024API.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +19,7 @@ namespace Hackathon2024API.Data
         public DbSet<UserFile> UserFiles { get; set; }
         
         public DbSet<User> Users { get; set; }
+        public DbSet<FileExtention> FileExtentions { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder builder)

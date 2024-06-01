@@ -1,11 +1,12 @@
 using System.Security.Claims;
 using Hackathon2024API.Data;
 using Hackathon2024API.DTO.User;
-using Hackathon2024API.Models;
+using Hackathon2024API.Data.Models;
 using Hackathon2024API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Hackathon2024API.Data.DTO;
 
 namespace Hackathon2024API.Controllers;
 
@@ -35,14 +36,9 @@ public class AdminController : ControllerBase
     }
     [HttpGet("Index")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> GetUsers([FromQuery]PaginationSettings pg)
+    public async Task<IActionResult> GetUsers([FromQuery]PaginationDTO pg)
     {
         return Ok(_context.Users.Skip(pg.Count*pg.Page).Take(pg.Count).ToList());
 
-    }
-    public record PaginationSettings
-    {
-        public int Count { get; set; }
-        public int Page { get; set; }
     }
 }
